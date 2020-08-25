@@ -30,6 +30,10 @@ namespace TextureMorph
             return new Vector2(texture.Width, texture.Height);
         }
 
+        public void Update(GameTime gameTime)
+        {
+        }
+
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, Position, new Rectangle(0, 0, 32, 32), Color.White, 0.0f, new Vector2(), Scale, SpriteEffects.None, 0.0f);

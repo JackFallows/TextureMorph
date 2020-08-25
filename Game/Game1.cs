@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Linq;
 
 namespace TextureMorph
 {
@@ -15,8 +16,12 @@ namespace TextureMorph
         private Voxel[] sprite1Voxels;
         private Voxel[] sprite2Voxels;
 
+        private VoxelTransition[] spriteTransitions;
+
         private const int Width = 640;
         private const int Height = 480;
+
+        private bool transitionStarted = false;
 
         public Game1()
         {
@@ -46,6 +51,8 @@ namespace TextureMorph
 
             sprite1Voxels = new VoxelSprite(sprite1).GetVoxels();
             sprite2Voxels = new VoxelSprite(sprite2).GetVoxels();
+
+            spriteTransitions = sprite1Voxels.Select((v, i) => new VoxelTransition(v, sprite2Voxels[i])).ToArray();
         }
 
         protected override void Update(GameTime gameTime)
@@ -53,7 +60,17 @@ namespace TextureMorph
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            if (Keyboard.GetState().IsKeyDown(Keys.Space) && !transitionStarted)
+            {
+                transitionStarted = true;
+                foreach(var vox in spriteTransitions)
+                {
+                    vox.Start(gameTime, 3);
+                }
+            }
+
             // TODO: Add your update logic here
+
 
             base.Update(gameTime);
         }
@@ -70,15 +87,23 @@ namespace TextureMorph
 
             ////sprite1Voxels[0].Draw(gameTime, _spriteBatch);
 
-            foreach (var vox in sprite1Voxels)
+            ////foreach (var vox in sprite1Voxels)
+            ////{
+            ////    vox.Draw(gameTime, _spriteBatch);
+            ////}
+
+            foreach (var vox in spriteTransitions)
             {
+                vox.Update(gameTime);
                 vox.Draw(gameTime, _spriteBatch);
             }
 
-            foreach (var vox in sprite2Voxels)
-            {
-                vox.Draw(gameTime, _spriteBatch);
-            }
+            ////sprite2.Draw(gameTime, _spriteBatch);
+
+            ////foreach (var vox in sprite2Voxels)
+            ////{
+            ////    vox.Draw(gameTime, _spriteBatch);
+            ////}
 
             _spriteBatch.End();
 
