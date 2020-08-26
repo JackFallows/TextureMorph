@@ -13,12 +13,6 @@ namespace TextureMorph
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private Sprite sprite1;
-        private Sprite sprite2;
-
-        private Voxel[] sprite1Voxels;
-        private Voxel[] sprite2Voxels;
-
         private VoxelTransition[] spriteTransitions;
         ////private SceneTransition sceneTransition;
 
@@ -56,13 +50,13 @@ namespace TextureMorph
 
             // TODO: use this.Content to load your game content here
 
-            sprite1 = new Sprite(Content.Load<Texture2D>("sprite1"), new Vector2(Width * 0.25f, Height * 0.5f), 4);
-            sprite2 = new Sprite(Content.Load<Texture2D>("sprite2"), new Vector2(Width * 0.75f, Height * 0.5f), 4);
+            var sprite1 = new Sprite(Content.Load<Texture2D>("sprite1"), new Vector2(Width * 0.25f, Height * 0.5f), 4);
+            var sprite2 = new Sprite(Content.Load<Texture2D>("sprite2"), new Vector2(Width * 0.75f, Height * 0.5f), 4);
 
-            sprite1Voxels = new VoxelSprite(sprite1).GetVoxels();
+            var sprite1Voxels = new VoxelSprite(sprite1).GetVoxels();
 
             var rnd = new Random();
-            sprite2Voxels = new VoxelSprite(sprite2).GetVoxels().OrderBy(v => rnd.Next()).ToArray();    // shuffle the target array
+            var sprite2Voxels = new VoxelSprite(sprite2).GetVoxels().OrderBy(v => rnd.Next()).ToArray();    // shuffle the target array
 
             spriteTransitions = sprite1Voxels.Select((v, i) => new VoxelTransition(v, sprite2Voxels[i])).ToArray();
             ////sceneTransition = new SceneTransition(spriteTransitions);

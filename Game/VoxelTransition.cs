@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -48,14 +49,14 @@ namespace TextureMorph
                 return;
             }
 
-            var mu = GetMu(startTime.Value.TotalMilliseconds, endTime.Value.TotalMilliseconds, gameTime.TotalGameTime.TotalMilliseconds);
+            var mu = GetCubicBezierMu(startTime.Value.TotalMilliseconds, endTime.Value.TotalMilliseconds, gameTime.TotalGameTime.TotalMilliseconds);
 
-            var x = CosineInterpolate(source.Position.X, target.Position.X, mu);
-            var y = CosineInterpolate(source.Position.Y, target.Position.Y, mu);
+            var x = Interpolate(source.Position.X, target.Position.X, mu);
+            var y = Interpolate(source.Position.Y, target.Position.Y, mu);
             
-            var r = CosineInterpolate(source.Color.R, target.Color.R, mu);
-            var g = CosineInterpolate(source.Color.G, target.Color.G, mu);
-            var b = CosineInterpolate(source.Color.B, target.Color.B, mu);
+            var r = Interpolate(source.Color.R, target.Color.R, mu);
+            var g = Interpolate(source.Color.G, target.Color.G, mu);
+            var b = Interpolate(source.Color.B, target.Color.B, mu);
 
             active.Position = new Vector2((float)x, (float)y);
             active.Color = new Color((int)r, (int)g, (int)b);
@@ -74,23 +75,31 @@ namespace TextureMorph
         }
 
         // http://paulbourke.net/miscellaneous/interpolation/
-        private static double LinearInterpolate(double v1, double v2, double mu)
+        private static double Interpolate(double v1, double v2, double mu)
         {
             return (v1 * (1 - mu) + v2 * mu);
         }
 
-        private static double CosineInterpolate(double v1, double v2, double mu)
-        {
-            double mu2;
-
-            mu2 = (1 - Math.Cos(mu * Math.PI)) / 2;
-            return (v1 * (1 - mu2) + v2 * mu2);
-        }
-
         // https://stats.stackexchange.com/a/154211
-        private static double GetMu(double startMilliseconds, double endMilliseconds, double currentMilliseconds)
+        private static double GetLinearMu(double startMilliseconds, double endMilliseconds, double currentMilliseconds)
         {
             return (currentMilliseconds - startMilliseconds) / (endMilliseconds - startMilliseconds);
+        }
+
+        private static double GetCosineMu(double startMilliseconds, double endMilliseconds, double currentMilliseconds)
+        {
+            var linearMu = GetLinearMu(startMilliseconds, endMilliseconds, currentMilliseconds);
+            var mu = (1 - Math.Cos(linearMu * Math.PI)) / 2;
+            return mu;
+        }
+
+        // https://easings.net/#easeInOutCubic
+        private static double GetCubicBezierMu(double startMilliseconds, double endMilliseconds, double currentMilliseconds)
+        {
+            var linearMu = GetLinearMu(startMilliseconds, endMilliseconds, currentMilliseconds);
+            return linearMu < 0.5
+                ? 4 * linearMu * linearMu * linearMu
+                : 1 - Math.Pow(-2 * linearMu + 2, 3) / 2;
         }
     }
 }
