@@ -5,7 +5,6 @@ namespace TextureMorph
 {
     public class Voxel : IActor
     {
-
         public Voxel(Vector2 position, Color color, float scale = 1.0f)
         {
             Position = position;
@@ -25,10 +24,7 @@ namespace TextureMorph
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            var tex = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-            tex.SetData(new[] { Color.White });
-
-            spriteBatch.Draw(tex, Position, new Rectangle(0, 0, 1, 1), Color, 0.0f, new Vector2(), Scale, SpriteEffects.None, 0.0f);
+            spriteBatch.Draw(GlobalContent.White, Position, new Rectangle(0, 0, 1, 1), Color, 0.0f, new Vector2(), Scale, SpriteEffects.None, 0.0f);
         }
     }
 }
