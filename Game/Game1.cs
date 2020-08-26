@@ -70,9 +70,15 @@ namespace TextureMorph
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !transitionStarted)
             {
                 transitionStarted = true;
+
+                var r = new Random();
+                int range = 2;
+                int min = 1;
+
                 foreach (var vox in spriteTransitions)
                 {
-                    vox.Start(gameTime, 1);
+                    var d = (r.NextDouble() * range) + min;
+                    vox.Start(gameTime, (int)(d * 1000));
                 }
                 ////sceneTransition.Start(gameTime, 1);
             }

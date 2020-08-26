@@ -25,7 +25,7 @@ namespace TextureMorph
             active = new Voxel(source.Position, source.Color, source.Scale);
         }
 
-        public void Start(GameTime currentGameTime, int durationSeconds)
+        public void Start(GameTime currentGameTime, int durationMilliseconds)
         {
             if (startTime != null)
             {
@@ -33,7 +33,7 @@ namespace TextureMorph
             }
 
             startTime = currentGameTime.TotalGameTime;
-            endTime = startTime.Value.Add(TimeSpan.FromSeconds(durationSeconds));
+            endTime = startTime.Value.Add(TimeSpan.FromMilliseconds(durationMilliseconds));
         }
 
         public void Update(GameTime gameTime)
