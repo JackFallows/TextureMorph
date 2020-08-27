@@ -1,33 +1,57 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace TextureMorph
 {
     public class Sprite : IActor
     {
         private readonly Texture2D texture;
+        
+        private Vector2 position;
+        private int scale;
 
         public Sprite(Texture2D texture, Vector2 position, int scale = 1)
         {
             this.texture = texture;
-            Position = position;
-            Scale = scale;
+            this.position = position;
+            this.scale = scale;
         }
 
-        public int Scale { get; private set; }
-
-        public Vector2 Position { get; private set; }
-
-        public Color[] GetPixels()
+        public Voxel[] GetVoxels()
         {
-            var rawData = new Color[texture.Width * texture.Height];
-            texture.GetData(rawData);
-            return rawData;
+            var pixels = GetPixels();
+            var dimensions = GetDimensions();
+
+            var pixels2D = Get2DPixels(pixels, dimensions);
+
+            var voxels = new List<Voxel>();
+
+            for (var y = 0; y < pixels2D.GetLength(0); y++)
+            {
+                for (var x = 0; x < pixels2D.GetLength(1); x++)
+                {
+                    var p = pixels2D[y, x];
+                    voxels.Add(new Voxel(new Vector2(position.X + (scale * x), position.Y + (scale * y)), p, scale));
+                }
+            }
+
+            return voxels.ToArray();
         }
 
-        public Vector2 GetDimensions()
+        private Color[,] Get2DPixels(Color[] pixels, Vector2 dimensions)
         {
-            return new Vector2(texture.Width, texture.Height);
+            Color[,] rawDataAsGrid = new Color[(int)dimensions.Y, (int)dimensions.X];
+            for (int row = 0; row < (int)dimensions.Y; row++)
+            {
+                for (int column = 0; column < (int)dimensions.X; column++)
+                {
+                    // Assumes row major ordering of the array.
+                    rawDataAsGrid[row, column] = pixels[row * (int)dimensions.X + column];
+                }
+            }
+
+            return rawDataAsGrid;
         }
 
         public void Update(GameTime gameTime)
@@ -36,7 +60,19 @@ namespace TextureMorph
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, Position, new Rectangle(0, 0, 32, 32), Color.White, 0.0f, new Vector2(), Scale, SpriteEffects.None, 0.0f);
+            spriteBatch.Draw(texture, position, new Rectangle(0, 0, 32, 32), Color.White, 0.0f, new Vector2(), scale, SpriteEffects.None, 0.0f);
+        }
+
+        private Color[] GetPixels()
+        {
+            var rawData = new Color[texture.Width * texture.Height];
+            texture.GetData(rawData);
+            return rawData;
+        }
+
+        private Vector2 GetDimensions()
+        {
+            return new Vector2(texture.Width, texture.Height);
         }
     }
 }

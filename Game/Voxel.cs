@@ -26,5 +26,10 @@ namespace TextureMorph
         {
             spriteBatch.Draw(GlobalContent.White, Position, new Rectangle(0, 0, 1, 1), Color, 0.0f, new Vector2(), Scale, SpriteEffects.None, 0.0f);
         }
+
+        public Voxel GetCopy()
+        {
+            return new Voxel(Position, Color, Scale);
+        }
     }
 }

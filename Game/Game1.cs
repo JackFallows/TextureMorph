@@ -1,10 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Diagnostics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace TextureMorph
 {
@@ -13,13 +10,10 @@ namespace TextureMorph
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private VoxelTransition[] spriteTransitions;
-        ////private SceneTransition sceneTransition;
+        private SceneTransition sceneTransition;
 
         private const int Width = 640;
         private const int Height = 480;
-
-        private bool transitionStarted = false;
 
         private FrameCounter frameCounter = new FrameCounter();
 
@@ -39,8 +33,6 @@ namespace TextureMorph
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             base.Initialize();
         }
 
@@ -48,18 +40,10 @@ namespace TextureMorph
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
-
             var sprite1 = new Sprite(Content.Load<Texture2D>("sprite1"), new Vector2(Width * 0.25f, Height * 0.5f), 4);
-            var sprite2 = new Sprite(Content.Load<Texture2D>("sprite2"), new Vector2(Width * 0.75f, Height * 0.5f), 4);
-
-            var sprite1Voxels = new VoxelSprite(sprite1).GetVoxels();
-
-            var rnd = new Random();
-            var sprite2Voxels = new VoxelSprite(sprite2).GetVoxels().OrderBy(v => rnd.Next()).ToArray();    // shuffle the target array
-
-            spriteTransitions = sprite1Voxels.Select((v, i) => new VoxelTransition(v, sprite2Voxels[i])).ToArray();
-            ////sceneTransition = new SceneTransition(spriteTransitions);
+            ////var sprite2 = new Sprite(Content.Load<Texture2D>("sprite2"), new Vector2(Width * 0.75f, Height * 0.5f), 4);
+            var sprite3 = new Sprite(Content.Load<Texture2D>("sprite3"), new Vector2(Width * 0.75f, Height * 0.5f), 4);
+            sceneTransition = new SceneTransition(sprite1, sprite3);
         }
 
         protected override void Update(GameTime gameTime)
@@ -67,35 +51,12 @@ namespace TextureMorph
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Space) && !transitionStarted)
+            if (Keyboard.GetState().IsKeyDown(Keys.Space))
             {
-                transitionStarted = true;
-
-                var r = new Random();
-                int range = 2;
-                int min = 1;
-
-                foreach (var vox in spriteTransitions)
-                {
-                    var d = (r.NextDouble() * range) + min;
-                    vox.Start(gameTime, (int)(d * 1000));
-                }
-                ////sceneTransition.Start(gameTime, 1);
+                sceneTransition.Start(gameTime);
             }
 
-
-            if (transitionStarted)
-            {
-                foreach (var vox in spriteTransitions)
-                {
-                    vox.Update(gameTime);
-                }
-
-                ////sceneTransition.Update(gameTime);
-            }
-
-            // TODO: Add your update logic here
-
+            sceneTransition.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -104,7 +65,6 @@ namespace TextureMorph
         {
             GraphicsDevice.Clear(Color.White);
 
-            // TODO: Add your drawing code here
             _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone, null, null);
 
             var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -114,36 +74,8 @@ namespace TextureMorph
             var fps = string.Format("FPS: {0}", frameCounter.AverageFramesPerSecond);
 
             Debug.WriteLine(fps);
-            ////_spriteBatch.DrawString(_spriteFont, fps, new Vector2(1, 1), Color.Black);
 
-            ////sprite1.Draw(gameTime, _spriteBatch);
-            ////sprite2.Draw(gameTime, _spriteBatch);
-
-            ////sprite1Voxels[0].Draw(gameTime, _spriteBatch);
-
-            ////foreach (var vox in sprite1Voxels)
-            ////{
-            ////    vox.Draw(gameTime, _spriteBatch);
-            ////}
-
-            ////Parallel.ForEach(spriteTransitions, (vox) =>
-            ////{
-            ////    vox.Draw(gameTime, _spriteBatch);
-            ////});
-
-            ////sceneTransition.Draw(gameTime, _spriteBatch);
-
-            for (var i = 0; i < spriteTransitions.Length; i++)
-            {
-                spriteTransitions[i].Draw(gameTime, _spriteBatch);
-            }
-
-            ////sprite2.Draw(gameTime, _spriteBatch);
-
-            ////foreach (var vox in sprite2Voxels)
-            ////{
-            ////    vox.Draw(gameTime, _spriteBatch);
-            ////}
+            sceneTransition.Draw(gameTime, _spriteBatch);
 
             _spriteBatch.End();
 
