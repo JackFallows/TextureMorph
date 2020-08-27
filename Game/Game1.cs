@@ -40,9 +40,9 @@ namespace TextureMorph
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            var sprite1 = new Sprite(Content.Load<Texture2D>("sprite1"), new Vector2(Width * 0.25f, Height * 0.5f), 4);
+            var sprite1 = new Sprite(Content.Load<Texture2D>("sprite3"), new Vector2(Width * 0.25f, Height * 0.5f), 4);
             ////var sprite2 = new Sprite(Content.Load<Texture2D>("sprite2"), new Vector2(Width * 0.75f, Height * 0.5f), 4);
-            var sprite3 = new Sprite(Content.Load<Texture2D>("sprite3"), new Vector2(Width * 0.75f, Height * 0.5f), 4);
+            var sprite3 = new Sprite(Content.Load<Texture2D>("sprite1"), new Vector2(Width * 0.75f, Height * 0.5f), 4);
             sceneTransition = new SceneTransition(sprite1, sprite3);
         }
 

@@ -60,7 +60,7 @@ namespace TextureMorph
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, position, new Rectangle(0, 0, 32, 32), Color.White, 0.0f, new Vector2(), scale, SpriteEffects.None, 0.0f);
+            spriteBatch.Draw(texture, position, new Rectangle(0, 0, texture.Width, texture.Height), Color.White, 0.0f, new Vector2(), scale, SpriteEffects.None, 0.0f);
         }
 
         private Color[] GetPixels()

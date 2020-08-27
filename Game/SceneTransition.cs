@@ -38,17 +38,12 @@ namespace TextureMorph
             if (sprite2Voxels.Length > sprite1Voxels.Length)
             {
                 var numToDuplicate = sprite2Voxels.Length - sprite1Voxels.Length;
-                var duplicates = new List<Voxel>();
-
-                for (var i = 0; i < numToDuplicate; i++)
-                {
-                    var indexToDupe = rnd.Next(sprite1Voxels.Length);
-                    duplicates.Add(sprite1Voxels[indexToDupe].GetCopy());
-                }
-
-                var temp = sprite1Voxels.ToList();
-                temp.AddRange(duplicates);
-                sprite1Voxels = temp.ToArray();
+                sprite1Voxels = WithDuplicatedVoxels(sprite1Voxels, numToDuplicate);
+            }
+            else if (sprite1Voxels.Length > sprite2Voxels.Length)
+            {
+                var numToDuplicate = sprite1Voxels.Length - sprite2Voxels.Length;
+                sprite2Voxels = WithDuplicatedVoxels(sprite2Voxels, numToDuplicate);
             }
 
             var range = 2;  // min + range = maximum duration of transition
@@ -91,6 +86,23 @@ namespace TextureMorph
             {
                 vox.Draw(gameTime, spriteBatch);
             }
+        }
+
+        private Voxel[] WithDuplicatedVoxels(Voxel[] voxels, int numToDuplicate)
+        {
+            var duplicates = new List<Voxel>();
+
+            var rnd = new Random();
+            for (var i = 0; i < numToDuplicate; i++)
+            {
+                var indexToDupe = rnd.Next(voxels.Length);
+                duplicates.Add(voxels[indexToDupe].GetCopy());
+            }
+
+            var temp = voxels.ToList();
+            temp.AddRange(duplicates);
+
+            return temp.ToArray();
         }
     }
 }
