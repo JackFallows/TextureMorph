@@ -5,11 +5,12 @@ namespace TextureMorph
 {
     public class Voxel : IActor
     {
-        public Voxel(Vector2 position, Color color, float scale = 1.0f)
+        public Voxel(Vector2 position, Color color, float scale = 1.0f, int drawOrder = 0)
         {
             Position = position;
             Color = color;
             Scale = scale;
+            DrawOrder = drawOrder;
         }
 
         public Vector2 Position { get; set; }
@@ -17,6 +18,8 @@ namespace TextureMorph
         public Color Color { get; set; }
 
         public float Scale { get; set; }
+
+        public int DrawOrder { get; }
 
         public void Update(GameTime gameTime)
         {

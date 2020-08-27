@@ -10,15 +10,18 @@ namespace TextureMorph
         
         private Vector2 position;
         private int scale;
+        private int drawOrder;
 
-        public Sprite(Texture2D texture, Vector2 position, int scale = 1)
+        public Sprite(Texture2D texture, Vector2 position, int scale = 1, int drawOrder = 0)
         {
             this.texture = texture;
             this.position = position;
             this.scale = scale;
+
+            this.drawOrder = drawOrder;
         }
 
-        public Voxel[] GetVoxels()
+        public List<Voxel> GetVoxels()
         {
             var pixels = GetPixels();
             var dimensions = GetDimensions();
@@ -32,11 +35,11 @@ namespace TextureMorph
                 for (var x = 0; x < pixels2D.GetLength(1); x++)
                 {
                     var p = pixels2D[y, x];
-                    voxels.Add(new Voxel(new Vector2(position.X + (scale * x), position.Y + (scale * y)), p, scale));
+                    voxels.Add(new Voxel(new Vector2(position.X + (scale * x), position.Y + (scale * y)), p, scale, drawOrder));
                 }
             }
 
-            return voxels.ToArray();
+            return voxels;
         }
 
         private Color[,] Get2DPixels(Color[] pixels, Vector2 dimensions)

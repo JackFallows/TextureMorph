@@ -40,10 +40,11 @@ namespace TextureMorph
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            var sprite1 = new Sprite(Content.Load<Texture2D>("sprite3"), new Vector2(Width * 0.25f, Height * 0.5f), 4);
-            ////var sprite2 = new Sprite(Content.Load<Texture2D>("sprite2"), new Vector2(Width * 0.75f, Height * 0.5f), 4);
-            var sprite3 = new Sprite(Content.Load<Texture2D>("sprite1"), new Vector2(Width * 0.75f, Height * 0.5f), 4);
-            sceneTransition = new SceneTransition(sprite1, sprite3);
+            var sprite1 = new Sprite(Content.Load<Texture2D>("sprite1"), new Vector2(Width * 0.25f, Height * 0.5f), 4, 0);
+            var sprite2 = new Sprite(Content.Load<Texture2D>("sprite2"), new Vector2(Width * 0.65f, Height * 0.35f), 4, 1);
+            var sprite3 = new Sprite(Content.Load<Texture2D>("sprite3"), new Vector2(Width * 0.75f, Height * 0.5f), 4, 2);
+
+            sceneTransition = new SceneTransition(new[] { sprite1 }, new[] { sprite2, sprite3 });
         }
 
         protected override void Update(GameTime gameTime)

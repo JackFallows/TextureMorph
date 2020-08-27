@@ -25,6 +25,8 @@ namespace TextureMorph
             active = new Voxel(source.Position, source.Color, source.Scale);
         }
 
+        public int DrawOrder => target.DrawOrder;
+
         public void Start(GameTime currentGameTime, int durationMilliseconds)
         {
             if (startTime != null)

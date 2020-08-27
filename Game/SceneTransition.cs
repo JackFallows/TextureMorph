@@ -8,8 +8,8 @@ namespace TextureMorph
 {
     public class SceneTransition
     {
-        private readonly Sprite sourceSprite;
-        private readonly Sprite targetSprite;
+        private readonly Sprite[] sourceSprites;
+        private readonly Sprite[] targetSprites;
         
         private bool started;
 
@@ -17,8 +17,16 @@ namespace TextureMorph
 
         public SceneTransition(Sprite sourceSprite, Sprite targetSprite)
         {
-            this.sourceSprite = sourceSprite;
-            this.targetSprite = targetSprite;
+            sourceSprites = new[] { sourceSprite };
+            targetSprites = new[] { targetSprite };
+
+            started = false;
+        }
+
+        public SceneTransition(Sprite[] sourceSprites, Sprite[] targetSprites)
+        {
+            this.sourceSprites = sourceSprites;
+            this.targetSprites = targetSprites;
 
             started = false;
         }
@@ -30,33 +38,36 @@ namespace TextureMorph
                 return;
             }
 
-            var sprite1Voxels = sourceSprite.GetVoxels();
+            var sourceVoxels = sourceSprites.SelectMany(s => s.GetVoxels()).ToArray();
 
             var rnd = new Random();
-            var sprite2Voxels = targetSprite.GetVoxels().OrderBy(v => rnd.Next()).ToArray();    // shuffle the target array
+            var targetVoxels = targetSprites.SelectMany(s => s.GetVoxels()).OrderBy(v => rnd.Next()).ToArray();    // shuffle the target array
 
-            if (sprite2Voxels.Length > sprite1Voxels.Length)
+            if (targetVoxels.Length > sourceVoxels.Length)
             {
-                var numToDuplicate = sprite2Voxels.Length - sprite1Voxels.Length;
-                sprite1Voxels = WithDuplicatedVoxels(sprite1Voxels, numToDuplicate);
+                var numToDuplicate = targetVoxels.Length - sourceVoxels.Length;
+                sourceVoxels = WithDuplicatedVoxels(sourceVoxels, numToDuplicate);
             }
-            else if (sprite1Voxels.Length > sprite2Voxels.Length)
+            else if (sourceVoxels.Length > targetVoxels.Length)
             {
-                var numToDuplicate = sprite1Voxels.Length - sprite2Voxels.Length;
-                sprite2Voxels = WithDuplicatedVoxels(sprite2Voxels, numToDuplicate);
+                var numToDuplicate = sourceVoxels.Length - targetVoxels.Length;
+                targetVoxels = WithDuplicatedVoxels(targetVoxels, numToDuplicate);
             }
 
             var range = 2;  // min + range = maximum duration of transition
             var min = 1;    // minimum duration of transition
 
-            voxelTransitions = sprite1Voxels.Select((v, i) =>
-            {
-                var vox = new VoxelTransition(v, sprite2Voxels[i]);
-                var d = (rnd.NextDouble() * range) + min;
-                vox.Start(gameTime, (int)(d * 1000));
+            voxelTransitions = sourceVoxels
+                .Select((v, i) =>
+                {
+                    var vox = new VoxelTransition(v, targetVoxels[i]);
+                    var d = (rnd.NextDouble() * range) + min;
+                    vox.Start(gameTime, (int)(d * 1000));
 
-                return vox;
-            }).ToArray();
+                    return vox;
+                })
+                .OrderBy(v => v.DrawOrder)
+                .ToArray();
 
             started = true;
         }
@@ -78,7 +89,11 @@ namespace TextureMorph
         {
             if (!started)
             {
-                sourceSprite.Draw(gameTime, spriteBatch);
+                foreach(var sprite in sourceSprites)
+                {
+                    sprite.Draw(gameTime, spriteBatch);
+                }
+
                 return;
             }
 
