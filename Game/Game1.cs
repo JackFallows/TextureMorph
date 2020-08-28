@@ -69,7 +69,7 @@ namespace TextureMorph
         {
             GraphicsDevice.Clear(Color.White);
 
-            _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone, null, null);
+            _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, null);
 
             var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 

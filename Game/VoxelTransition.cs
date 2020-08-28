@@ -10,10 +10,10 @@ namespace TextureMorph
         private readonly Voxel target;
 
         private readonly Vector2 center;    // transition around a circle at this position
-        private double centerRadius;
+        private double startCenterRadius;
+        private double endCenterRadius;
 
         private TimeSpan? startTime = null;
-        private TimeSpan? middleTime = null;
         private TimeSpan? endTime = null;
 
         private double startAngle;
@@ -29,17 +29,23 @@ namespace TextureMorph
             this.target = target;
             this.center = center;
 
-            centerRadius = Math.Sqrt(Math.Pow(source.Position.X - center.X, 2) + Math.Pow(source.Position.Y - center.Y, 2)); // (x - x0)2 + (y - y0)2 = r2 http://mathcentral.uregina.ca/QQ/database/QQ.09.07/s/raymund1.html
+            startCenterRadius = Math.Sqrt(Math.Pow(source.Position.X - center.X, 2) + Math.Pow(source.Position.Y - center.Y, 2)); // (x - x0)2 + (y - y0)2 = r2 http://mathcentral.uregina.ca/QQ/database/QQ.09.07/s/raymund1.html
+            endCenterRadius = Math.Sqrt(Math.Pow(target.Position.X - center.X, 2) + Math.Pow(target.Position.Y - center.Y, 2));
 
             var x = center.X - source.Position.X;
-            startAngle = Math.Acos(x / centerRadius);
+            startAngle = Math.Acos(x / startCenterRadius);
 
             if (source.Position.Y > center.Y)
             {
                 startAngle = -startAngle;
             }
 
-            endAngle = ((startAngle * (180 / Math.PI)) + 180) * (Math.PI / 180); // convert to degrees (r * 180 / PI), add 180 degrees, convert back to radians (d * PI / 180)
+            endAngle = Math.Acos((center.X - target.Position.X) / endCenterRadius);
+
+            if (target.Position.Y > center.Y)
+            {
+                endAngle = -endAngle + ToRadians(360);
+            }
 
             active = new Voxel(source.Position, source.Color, source.Scale);
         }
@@ -54,7 +60,6 @@ namespace TextureMorph
             }
 
             startTime = currentGameTime.TotalGameTime;
-            middleTime = startTime.Value.Add(TimeSpan.FromMilliseconds(durationMilliseconds / 2));
             endTime = startTime.Value.Add(TimeSpan.FromMilliseconds(durationMilliseconds));
         }
 
@@ -71,35 +76,18 @@ namespace TextureMorph
                 return;
             }
 
-            double linearMu;
-            double x, y;
+            var linearMu = GetLinearMu(startTime.Value.TotalMilliseconds, endTime.Value.TotalMilliseconds, gameTime.TotalGameTime.TotalMilliseconds);
+            var cubicEaseInOutMu = GetCubicEaseInOutMu(linearMu);
 
-            if (gameTime.TotalGameTime < middleTime.Value)  // first transition
-            {
-                linearMu = GetLinearMu(startTime.Value.TotalMilliseconds, middleTime.Value.TotalMilliseconds, gameTime.TotalGameTime.TotalMilliseconds);
-                var cubicEaseInMu = GetCubicEaseInMu(linearMu);
+            var r = Interpolate(source.Color.R, target.Color.R, cubicEaseInOutMu);
+            var g = Interpolate(source.Color.G, target.Color.G, cubicEaseInOutMu);
+            var b = Interpolate(source.Color.B, target.Color.B, cubicEaseInOutMu);
 
-                var currentAngle = Interpolate(startAngle, endAngle, cubicEaseInMu);
+            var centerRadius = Interpolate(startCenterRadius, endCenterRadius, cubicEaseInOutMu);
+            var currentAngle = Interpolate(startAngle, endAngle, cubicEaseInOutMu);
 
-                x = center.X - (Math.Cos(currentAngle) * centerRadius);
-                y = center.Y - (Math.Sin(currentAngle) * centerRadius);
-            }
-            else // last transition
-            {
-                linearMu = GetLinearMu(middleTime.Value.TotalMilliseconds, endTime.Value.TotalMilliseconds, gameTime.TotalGameTime.TotalMilliseconds);
-                var cubicEaseOutMu = GetCubicEaseOutMu(linearMu);
-
-                var sourcePosition = new Vector2((float)(center.X - (Math.Cos(endAngle) * centerRadius)), (float)(center.Y - (Math.Sin(endAngle) * centerRadius)));
-                var targetPosition = target.Position;
-
-                x = Interpolate(sourcePosition.X, targetPosition.X, cubicEaseOutMu);
-                y = Interpolate(sourcePosition.Y, targetPosition.Y, cubicEaseOutMu);
-            }
-
-            linearMu = GetLinearMu(startTime.Value.TotalMilliseconds, endTime.Value.TotalMilliseconds, gameTime.TotalGameTime.TotalMilliseconds);
-            var r = Interpolate(source.Color.R, target.Color.R, linearMu);
-            var g = Interpolate(source.Color.G, target.Color.G, linearMu);
-            var b = Interpolate(source.Color.B, target.Color.B, linearMu);
+            var x = center.X - (Math.Cos(currentAngle) * centerRadius);
+            var y = center.Y - (Math.Sin(currentAngle) * centerRadius);
 
             active.Position = new Vector2((float)x, (float)y);
             active.Color = new Color((int)r, (int)g, (int)b);
@@ -137,12 +125,12 @@ namespace TextureMorph
         ////}
 
         // https://easings.net/#easeInOutCubic
-        ////private static double GetCubicEaseInOutMu(double linearMu)
-        ////{
-        ////    return linearMu < 0.5
-        ////        ? 4 * linearMu * linearMu * linearMu
-        ////        : 1 - Math.Pow(-2 * linearMu + 2, 3) / 2;
-        ////}
+        private static double GetCubicEaseInOutMu(double linearMu)
+        {
+            return linearMu < 0.5
+                ? 4 * linearMu * linearMu * linearMu
+                : 1 - Math.Pow(-2 * linearMu + 2, 3) / 2;
+        }
 
         // https://easings.net/#easeInCubic
         private static double GetCubicEaseInMu(double linearMu)
@@ -154,6 +142,16 @@ namespace TextureMorph
         private static double GetCubicEaseOutMu(double linearMu)
         {
             return 1 - Math.Pow(1 - linearMu, 3);
+        }
+
+        private static double ToDegrees(double radians)
+        {
+            return radians * 180 / Math.PI;
+        }
+
+        private static double ToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180;
         }
     }
 }
