@@ -60,7 +60,7 @@ namespace TextureMorph
             voxelTransitions = sourceVoxels
                 .Select((v, i) =>
                 {
-                    var vox = new VoxelTransition(v, targetVoxels[i]);
+                    var vox = new VoxelTransition(v, targetVoxels[i], new Vector2(400, 300));
                     var d = (rnd.NextDouble() * range) + min;
                     vox.Start(gameTime, (int)(d * 1000));
 

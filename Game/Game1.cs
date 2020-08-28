@@ -12,28 +12,31 @@ namespace TextureMorph
 
         private SceneTransition sceneTransition;
 
-        private const int Width = 640;
-        private const int Height = 480;
+        private const int Width = 800;
+        private const int Height = 600;
 
         private FrameCounter frameCounter = new FrameCounter();
 
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
-            _graphics.PreferredBackBufferWidth = Width;
-            _graphics.PreferredBackBufferHeight = Height;
+            
             _graphics.SynchronizeWithVerticalRetrace = false;
             IsFixedTimeStep = false;
-            _graphics.ApplyChanges();
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
 
-            GlobalContent.Initialise(_graphics.GraphicsDevice);
         }
 
         protected override void Initialize()
         {
             base.Initialize();
+
+            _graphics.PreferredBackBufferWidth = Width;
+            _graphics.PreferredBackBufferHeight = Height;
+            _graphics.ApplyChanges();
+         
+            GlobalContent.Initialise(_graphics.GraphicsDevice);
         }
 
         protected override void LoadContent()
