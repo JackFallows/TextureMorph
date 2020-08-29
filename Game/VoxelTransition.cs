@@ -8,8 +8,9 @@ namespace TextureMorph
     {
         private readonly Voxel source;
         private readonly Voxel target;
-
         private readonly Vector2 center;    // transition around a circle at this position
+        private readonly int transitionDuration;
+
         private double startCenterRadius;
         private double middleCenterRadius;
         private double endCenterRadius;
@@ -25,11 +26,12 @@ namespace TextureMorph
 
         private bool done = false;
 
-        public VoxelTransition(Voxel source, Voxel target, Vector2 center)
+        public VoxelTransition(Voxel source, Voxel target, Vector2 center, int transitionDuration)
         {
             this.source = source;
             this.target = target;
             this.center = center;
+            this.transitionDuration = transitionDuration;
 
             var rnd = new Random();
 
@@ -57,9 +59,11 @@ namespace TextureMorph
             active = new Voxel(source.Position, source.Color, source.Scale);
         }
 
+        public bool Started => startTime != null;
+
         public int DrawOrder => target.DrawOrder;
 
-        public void Start(GameTime currentGameTime, int durationMilliseconds)
+        public void Start(GameTime currentGameTime)
         {
             if (startTime != null)
             {
@@ -67,8 +71,8 @@ namespace TextureMorph
             }
 
             startTime = currentGameTime.TotalGameTime;
-            middleTime = startTime.Value.Add(TimeSpan.FromMilliseconds(durationMilliseconds / 2));
-            endTime = startTime.Value.Add(TimeSpan.FromMilliseconds(durationMilliseconds));
+            middleTime = startTime.Value.Add(TimeSpan.FromMilliseconds(transitionDuration / 2));
+            endTime = startTime.Value.Add(TimeSpan.FromMilliseconds(transitionDuration));
         }
 
         public void Update(GameTime gameTime)

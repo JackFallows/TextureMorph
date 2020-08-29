@@ -12,6 +12,7 @@ namespace TextureMorph
         private readonly Sprite[] targetSprites;
         
         private bool started;
+        private TimeSpan? startTime;
 
         private VoxelTransition[] voxelTransitions;
 
@@ -21,6 +22,7 @@ namespace TextureMorph
             targetSprites = new[] { targetSprite };
 
             started = false;
+            startTime = null;
         }
 
         public SceneTransition(Sprite[] sourceSprites, Sprite[] targetSprites)
@@ -60,16 +62,16 @@ namespace TextureMorph
             voxelTransitions = sourceVoxels
                 .Select((v, i) =>
                 {
-                    var vox = new VoxelTransition(v, targetVoxels[i], new Vector2(400, 300));
                     var d = (rnd.NextDouble() * range) + min;
-                    vox.Start(gameTime, (int)(d * 1000));
 
+                    var vox = new VoxelTransition(v, targetVoxels[i], new Vector2(400, 300), (int)(d * 1000));
                     return vox;
                 })
                 .OrderBy(v => v.DrawOrder)
                 .ToArray();
 
             started = true;
+            startTime = gameTime.TotalGameTime;
         }
 
         public void Update(GameTime gameTime)
@@ -79,9 +81,25 @@ namespace TextureMorph
                 return;
             }
 
-            foreach (var vox in voxelTransitions)
+            const int transitionStartIntervalMilliseconds = 1;
+
+            for (var i = 0; i < voxelTransitions.Length; i++)
             {
-                vox.Update(gameTime);
+                var vox = voxelTransitions[i];
+
+                if (vox.Started)
+                {
+                    vox.Update(gameTime);
+                }
+                else
+                {
+                    var elapsed = gameTime.TotalGameTime.TotalMilliseconds - startTime.Value.TotalMilliseconds;
+                    if (elapsed >= (i * transitionStartIntervalMilliseconds))
+                    {
+                        vox.Start(gameTime);
+                        vox.Update(gameTime);
+                    }
+                }
             }
         }
 
