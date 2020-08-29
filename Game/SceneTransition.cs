@@ -55,7 +55,7 @@ namespace TextureMorph
             }
 
             var range = 2;  // min + range = maximum duration of transition
-            var min = 1;    // minimum duration of transition
+            var min = 2;    // minimum duration of transition
 
             voxelTransitions = sourceVoxels
                 .Select((v, i) =>
